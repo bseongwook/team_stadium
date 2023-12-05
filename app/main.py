@@ -11,99 +11,67 @@ from plotly.validators.scatter.marker import SymbolValidator # Symbol 꾸미기�
 import matplotlib.pyplot as plt  # 그래프 그리는 용도
 import matplotlib.font_manager as fm  # 폰트 관련 용도
 import seaborn as sns
-
+import math
 import streamlit as st
-import FinanceDataReader as fdr
 import datetime
 import io
 import plotly.figure_factory as ff
 
-
-
 st.header('서울시 공연장 관련 통계 분석 및 시각화')
 
-st.sidebar.markdown('회사 이름과 기간을 입력하세요')
+# st.sidebar.markdown('회사 이름과 기간을 입력하세요')
 
-# Using object notation
-stock_name = st.sidebar.text_input("회사 이름")
+# 기본 csv파일
+data = pd.read_csv('./culture_space.csv', 
+                   encoding="utf-8" )
+data.replace('-', 0, inplace = True)
+data_og = data.copy() # 원본 저장
 
-today = datetime.datetime.now()
-next_year = today.year + 1
-jan_1 = datetime.date(next_year, 1, 1)
-dec_31 = datetime.date(next_year, 12, 31)
+# 3번 
+df = data.transpose()
+df.rename(columns=df.iloc[0], inplace=True)
+df = df.drop(df.index[0])
+newdf = df.reset_index()
+newdf = newdf[(newdf['자치구']=='대공연장(1000석 이상)') 
+              | (newdf['자치구']=='일반공연장(300~999석)') 
+              | (newdf['자치구']=='소공연장(300석 미만)')]
+newdf['index'] = newdf['index'].apply(lambda x : float(x))
+newdf['index'] = newdf['index'].apply(lambda x : math.floor(x))
+newdf = newdf.loc[:,['index', '자치구', '서울']]
 
-# Using "with" notation
-with st.sidebar:
-    d = st.date_input(
-    "시작일 - 종료일",
-    (jan_1, datetime.date(next_year, 1, 7)),
-    # jan_1,
-    # dec_31,
-    format="MM.DD.YYYY",
-)
-# st.write(d) # (datetime.date(2024, 1, 4), datetime.date(2024, 1, 6))
+option = st.sidebar.selectbox(
+    '보고 싶은 항목을 선택해주세요',
 
-accept = st.sidebar.button("주가 데이터 확인")
-    
-def get_stock_info():
-    base_url = "http://kind.krx.co.kr/corpgeneral/corpList.do"
-    method = "download"
-    url = "{0}?method={1}".format(base_url, method)
-    df = pd.read_html(url, header=0, encoding='cp949')[0]
-    df['종목코드']= df['종목코드'].apply(lambda x: f"{x:06d}")     
-    df = df[['회사명','종목코드']]
-    return df
+    ('서울시 공연장 증감 추이', 
+     '서울시 공공공연장과 민간공연장 수 차이', 
+     '서울시 대/일반/소 공연장 수 차이', 
+     '구 별 지도'))
 
-def get_ticker_symbol(company_name):
-    df = get_stock_info()
-    code = df[df['회사명']==company_name]['종목코드'].values
-    ticker_symbol = code[0]
-    return ticker_symbol
+accept = st.sidebar.button("확인")
 
-@st.cache_data
-def convert_df(df):
-    # IMPORTANT: Cache the conversion to prevent computation on every rerun
-    return df.to_csv().encode('utf-8')
-
-def download_excel(df, filename='주가데이터.xlsx'):
-    df.to_excel('주가데이터.xlsx', index=False)
-
-# 코드 조각 추가
 if accept:
-    ticker_symbol = get_ticker_symbol(stock_name)
-    start_p = d[0]
-    end_p = d[1] + datetime.timedelta(days=1)
-    df = fdr.DataReader(ticker_symbol, start_p, end_p, exchange="KRX")
-    df.index = df.index.date
-    st.subheader(f"[{stock_name}] 주가 데이터")
-    st.dataframe(df.head())
-    # st.plotly_chart(df, x=df.index, y='Close',range_x=['start_p', 'end_p'])
-    # fig = ff.create_distplot(df, group_labels=)
-    # st.plotly_chart(fig, use_container_width=True)
-    chart_data = pd.DataFrame(df, columns=["Close"])
-    st.line_chart(chart_data)
+    if option == '서울시 공연장 증감 추이':
+        st.write('서울시 공연장 증감 추이')
 
-    csv = convert_df(df)
+    elif option == '서울시 공공공연장과 민간공연장 수 차이':
+        st.write('서울시 공공공연장과 민간공연장 수 차이')
 
-    col1, col2 = st.columns(2)
-    col1.download_button(
-        label="Download data as CSV",
-        data=csv,
-        file_name='주가데이터.csv',
-        mime='text/csv',
-    )
-    # excel_path = 'temp_data.xlsx'
-    # if col2.button('Download data as Excel'):
-    #     df.to_excel(excel_path, index=False)
-    #     st.download_button(
-    #         label="Download data as Excel",
-    #         data=open(excel_path, 'rb'),  # 파일을 바이너리 모드로 열기
-    #         file_name='주가데이터.xlsx',  # 파일 이름 지정
-    #         mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',  # MIME 타입 지정
-    #     )
-    excel_data = io.BytesIO()      
-    df.to_excel(excel_data)
+    elif option == '서울시 대/일반/소 공연장 수 차이':
+        st.write('서울시 대/일반/소 공연장 수 차이')
+        fig = px.bar(newdf,
+              x="자치구",
+              y="서울",
+              title='서울시 대/일반/소 공연장 수 차이',
+              hover_data=['서울'],
+              color = '자치구',
+             facet_col = 'index',
+              labels={'index':'연도', '서울':'공연장 수', '자치구':'공연장 규모'},
+             text = '서울'
+              )
+        # fig.show()
+        st.write(fig)
 
-    col2.download_button(label="Download data as Excel", 
-                         excel_data, 
-                         file_name='stock_data.xlsx')
+    else:
+        st.write('구 별 지도')
+else:
+    st.write('좌측 사이드바에서 보고 싶은 항목을 선택해주세요 :sunglasses:')

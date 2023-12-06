@@ -52,13 +52,15 @@ newdf = newdf.loc[:,['index', '자치구', '서울']]
 
 # 4번
 
+
+
 # 사이드 바
 option = st.sidebar.selectbox(
     '보고 싶은 항목을 선택해주세요',
 
     ('서울시 공연장 증감 추이', 
-     '서울시 공공공연장과 민간공연장 수 차이', 
-     '서울시 대/일반/소 공연장 수 차이', 
+     '서울시 공연장 종류에 따른 수 차이', 
+     '서울시 공연장 규모에 따른 수 차이', 
      '구 별 지도'))
 
 accept = st.sidebar.button("확인")
@@ -74,26 +76,26 @@ if accept:
         )
         st.write(fig)
 
-    elif option == '서울시 공공공연장과 민간공연장 수 차이':
+    elif option == '서울시 공연장 종류에 따른 수 차이':
         fig2 =px.bar(newdf,
                 x="자치구",
                 y="서울",
                 facet_col='index',
                 color='자치구',
                 text = "서울",
-                labels={'index':'연도', '서울':'공연장 수', '자치구':'공연장 종류'},
-                title='서울시 공공공영장과 민간공영장 차이')
+                labels={'index':'y', '서울':'공연장 수', '자치구':''},
+                title='서울시 공연장 종류에 따른 수 차이')
         st.write(fig2)
 
-    elif option == '서울시 대/일반/소 공연장 수 차이':
+    elif option == '서울시 공연장 규모에 따른 수 차이':
         fig = px.bar(newdf,
               x="자치구",
               y="서울",
-              title='서울시 대/일반/소 공연장 수 차이',
+              title='서울시 공연장 규모에 따른 수 차이',
               hover_data=['서울'],
               color = '자치구',
              facet_col = 'index',
-              labels={'index':'연도', '서울':'공연장 수', '자치구':'공연장 규모'},
+              labels={'index':'y', '서울':'공연장 수', '자치구':''},
              text = '서울' )
         st.write(fig)
 

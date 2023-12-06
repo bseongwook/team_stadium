@@ -19,12 +19,16 @@ import plotly.figure_factory as ff
 
 import folium
 import json
+import os
 
 from streamlit_folium import st_folium
 from streamlit_folium import folium_static
 
 st.header('서울시 공연장 관련 통계 분석 및 시각화', divider='rainbow')
 
+
+cwd = os.getcwd()
+st.write(cwd)
 # 기본 csv파일
 # data = pd.read_csv('./culture_space.csv', 
 #                    encoding="utf-8" )

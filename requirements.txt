@@ -7,4 +7,8 @@ matplotlib
 seaborn
 streamlit
 datetime
-math
+# math
+
+folium
+# json
+streamlit-folium 

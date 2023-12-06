@@ -114,7 +114,7 @@ if contents_table == '그래프':
         st.divider()
 
     elif option == '서울시 공연장 종류에 따른 수 차이':
-        fig2 =px.bar(newdf,
+        fig2 =px.bar(newdf2,
                 x="자치구",
                 y="서울",
                 facet_col='index',
@@ -143,7 +143,7 @@ if contents_table == '그래프':
         #yyyy = st.sidebar.number_input("Insert a number", value=2013, placeholder="Type a number...")
         yyyy = st.sidebar.selectbox(
         '원하는 년도를 선택해주세요',
-        (2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020))
+        (2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022))
         folium_static(map_change(yyyy))
         # https://github.com/randyzwitch/streamlit-folium
         
@@ -166,7 +166,7 @@ elif contents_table == '데이터 설명':
     st.subheader('데이터 출처')
     st.write('https://data.seoul.go.kr/dataList/164/S/2/datasetView.do?stcSrl=164')
 
-        # 다운로드
+    # 다운로드
     st.subheader('데이터 다운로드')
 
     @st.cache_data 

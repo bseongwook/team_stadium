@@ -17,6 +17,12 @@ import datetime
 import io
 import plotly.figure_factory as ff
 
+import folium
+import json
+
+from streamlit_folium import st_folium
+
+
 st.header('서울시 공연장 관련 통계 분석 및 시각화', divider='rainbow')
 
 # 기본 csv파일
@@ -28,6 +34,8 @@ data_og = data.copy() # 원본 저장
 df = data.transpose()
 df.rename(columns=df.iloc[0], inplace=True)
 df = df.drop(df.index[0])
+df_og = df.copy()
+
 newdf = df.reset_index()
 newdf['index'] = newdf['index'].apply(lambda x : float(x))
 newdf['index'] = newdf['index'].apply(lambda x : math.floor(x))
@@ -54,8 +62,27 @@ newdf = newdf[(newdf['자치구']=='대공연장(1000석 이상)')
 newdf = newdf.loc[:,['index', '자치구', '서울']]
 
 # 4번
+geojson = json.load(open('./seoulsigungu.geojson', encoding='utf-8'))
+df_gu = df.loc[['2013','2014','2015','2016','2017','2018','2019','2020','2021','2022']].drop(['서울', '자치구'], axis=1)
+df_gu.index.name = "연도"
 
+#데이터가 오브젝트여서 인트로 변환
+df_gut = df_gu.T
+df_gut = df_gut.astype(int)
 
+def map_change(year) :
+    map = folium.Map( location = [37.541, 126.986], zoom_start=11,tiles='cartodbpositron')
+    folium.Choropleth(
+        geo_data = geojson,
+        data = df_gut,
+        columns = [df_gut.index, str(year)],
+        fill_color='YlOrRd',
+        #fill_opacity = 0.7,
+        line_opacity=0.8,
+        key_on = 'properties.SIG_KOR_NM'
+    ).add_to(map)
+
+    return(map)
 
 # 사이드 바
 moccha = st.sidebar.selectbox(
@@ -74,6 +101,7 @@ if moccha == '그래프':
         '구 별 지도'))
 
 accept = st.sidebar.button("확인")
+make_map = False
 
 # 사이드 바 확인 버튼 누르면 실행
 if moccha == '그래프' and accept:
@@ -113,15 +141,19 @@ if moccha == '그래프' and accept:
         st.divider()
 
     else:
-        
+        yyyy = st.number_input("Insert a number", value=2013, placeholder="Type a number...")
+        yyyy = int(yyyy)
+        seoul_map = st_folium(map_change(yyyy))
 
-        st.divider()
+
+
 elif moccha == '데이터 설명' and accept:
     st.subheader('데이터 설명')
     st.write(for_prac)
     st.divider()
     data_explain = """
-    1. "-" 로 되어있는 값은 공연장이 없는 곳이라고 생각하고 0으로 처리하여 사용했습니다. 위에 데이터는 0으로 처리한 후의 데이터 입니다.
+    1. "-" 로 되어있는 값은 공연장이 없는 곳이라고 생각하고 0으로 처리하여 사용했습니다. 
+        위 데이터는 0으로 처리한 후의 데이터 입니다.
     2. 2013년 2022년까지 서울시 공연장 수에 대한 데이터입니다.
     3. 서울 전체의 공연장 수와 각 구의 공연장 수에 대한 데이터로 이루어져 있습니다.
     4. 연도별로 서울시 공연장 수를 공연장의 종류와 규모로 나누어서 볼 수 있습니다.
@@ -132,5 +164,10 @@ elif moccha == '데이터 설명' and accept:
 
     st.subheader('데이터 출처')
     st.write('https://data.seoul.go.kr/dataList/164/S/2/datasetView.do?stcSrl=164')
+
+    st.subheader('데이터 분석 목적')
+    st.write('각종 문화활동을 접하고 참여할 수 있는 문화시설현황 파악을 통해, \
+             시설의 효율적인 관리ㆍ활용을 도모하고 국민의 문화향유 확대, \
+             정책 수립을 위한 기초자료로 활용하는 것을 목적으로 한다.')
 else:
     st.write('좌측 사이드바에서 보고 싶은 항목을 선택해주세요 :sunglasses:')

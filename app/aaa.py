@@ -68,7 +68,7 @@ newdf = newdf[(newdf['자치구']=='대공연장(1000석 이상)')
 newdf = newdf.loc[:,['index', '자치구', '서울']]
 
 # 4번
-geojson = json.load(open('./seoulsigungu.geojson', encoding='utf-8'))
+geojson = json.load(open('./app/seoulsigungu.geojson', encoding='utf-8'))
 df_gu = df.loc[['2013','2014','2015','2016','2017','2018','2019','2020','2021','2022']].drop(['서울', '자치구'], axis=1)
 df_gu.index.name = "연도"
 

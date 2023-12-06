@@ -23,10 +23,12 @@ import json
 from streamlit_folium import st_folium
 from streamlit_folium import folium_static
 
-st.header('서울시 공연장 관련 통계 분석 및 시각화', divider='rainbow')
+st.header('서울시 공연장 관련 통계 분석 및 ', divider='rainbow')
 
 # 기본 csv파일
-data = pd.read_csv('./culture_space.csv', 
+# data = pd.read_csv('./culture_space.csv', 
+#                    encoding="utf-8" )
+data = pd.read_csv('https://drive.google.com/file/d/123QFdJqbxMHxSAU8KPhjwr4wuYtOiMpV/view?usp=sharing', 
                    encoding="utf-8" )
 data.replace('-', 0, inplace = True)
 data_og = data.copy() # 원본 저장
@@ -144,9 +146,11 @@ if contents_table == '그래프':
         yyyy = st.sidebar.selectbox(
         '원하는 년도를 선택해주세요',
         (2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022))
+        st.write('구 별 공연장 수 지도에 시각화')
         folium_static(map_change(yyyy))
         # https://github.com/randyzwitch/streamlit-folium
-        
+        st.divider()
+
 
 elif contents_table == '데이터 설명':
     st.subheader('데이터 설명')

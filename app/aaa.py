@@ -26,7 +26,7 @@ from streamlit_folium import folium_static
 st.header('서울시 공연장 관련 통계 분석 및 시각화', divider='rainbow')
 
 # 기본 csv파일
-data = pd.read_csv('.\culture_space.csv', 
+data = pd.read_csv('culture_space.csv', 
                    encoding="utf-8" )
 data.replace('-', 0, inplace = True)
 data_og = data.copy() # 원본 저장
@@ -63,7 +63,7 @@ newdf = newdf[(newdf['자치구']=='대공연장(1000석 이상)')
 newdf = newdf.loc[:,['index', '자치구', '서울']]
 
 # 4번
-geojson = json.load(open('.\seoulsigungu.geojson', encoding='utf-8'))
+geojson = json.load(open('seoulsigungu.geojson', encoding='utf-8'))
 df_gu = df.loc[['2013','2014','2015','2016','2017','2018','2019','2020','2021','2022']].drop(['서울', '자치구'], axis=1)
 df_gu.index.name = "연도"
 

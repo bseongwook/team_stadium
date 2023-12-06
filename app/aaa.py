@@ -26,10 +26,10 @@ from streamlit_folium import folium_static
 st.header('서울시 공연장 관련 통계 분석 및 시각화', divider='rainbow')
 
 # 기본 csv파일
-data = pd.read_csv('./culture_space.csv', 
-                   encoding="utf-8" )
-# data = pd.read_csv('https://drive.google.com/file/d/123QFdJqbxMHxSAU8KPhjwr4wuYtOiMpV/view?usp=sharing', 
+# data = pd.read_csv('./culture_space.csv', 
 #                    encoding="utf-8" )
+data = pd.read_csv('bseongwook/team_stadium/main/app/culture_space.csv', 
+                   encoding="utf-8" )
 data.replace('-', 0, inplace = True)
 data_og = data.copy() # 원본 저장
 
